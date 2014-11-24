@@ -5,14 +5,13 @@ import logging
 
 
 version = 20
-mode_read = 0
-mode_write = 1
 
 
 class ModioFileTag:
 
 	def __init__(self, tag, data):
-		validate_data_block_types(data)
+		data = validate_data_block_types(data)
+		print("new type:", type(data))
 
 		if type(tag) is str:
 			self.tag = _tag_StringToInt(tag)
@@ -46,15 +45,16 @@ class ModioFileTag:
 		data = []
 		tmp = ""
 		for i in self.data:
-			if 32 <= i < 127:
-				tmp = tmp + "".join(chr(i))
-
-			else:
-				if tmp:
-					data.append(tmp)
-					del(tmp)
-
-				data.append(i)
+#			if 32 <= i < 127:
+#				tmp = tmp + "".join(chr(i))
+#
+#			else:
+#				if tmp:
+#					data.append(tmp)
+#					del(tmp)
+#
+#				data.append(i)
+			data.append(i)
 
 		return data
 
@@ -88,10 +88,10 @@ class ModioSession:
 		self.numtags = 0
 		self.tagdict = {}
 
-		if self.filemode == mode_read:
+		if self.filemode == "r":
 			return self.__read__()
 
-		elif self.filemode == mode_write:
+		elif self.filemode == "w":
 			return self.__write__()
 
 		return
@@ -142,17 +142,10 @@ class ModioSession:
 	def close(self):
 		logging.debug("close: %s"%(self))
 
-		if self.filemode == mode_write:
-
+		# Upon closing the file, if it was in write mode then write the data.
+		if self.filemode == "w":
 			with io.open(self.filename, "wb") as f:
 				data = self.get_bytes()
-
-				for i, j in enumerate(data):
-					#print("[%02d/%02d] : %d"%(i, len(data), data[i]))
-					print(i, type(data[i]), data[i])
-
-				print(struct.pack('%dI'%(len(data)), *data))
-
 				f.write(struct.pack('%dI'%(len(data)), *data))
 
 		return
@@ -253,21 +246,51 @@ def _tag_IntToString(i):
 
 # Ensures all elements in 'data' are uints
 def validate_data_block_types(data):
-	for i, d in enumerate(data):
-		datatype = type(d)
+	datatype = type(data)
+	print("Data type for", data, "is:", datatype)
 
-		# If the data type is a string, insert each char as a uint
-		if datatype == str:
-			# Delete the existing element (the string)
-			del(data[i])
+	if datatype == list:
+		for i, d in enumerate(data):
+			datatype = type(d)
 
-			# Run through the string, grab each character integer and insert it
-			pos = 0
-			for char in d:
-				data.insert(i + pos, ord(char))
-				pos += 1
+			# If the data type is a string, insert each char as a uint
+			if datatype == str:
+				# Delete the existing element (the string)
+				del(data[i])
 
-		elif datatype != int:
-			return 0
+				# Run through the string, grab each character integer and insert it
+				pos = 0
+				for char in d:
+					data.insert(i + pos, ord(char))
+					pos += 1
 
-	return 1
+			elif datatype != int:
+				raise UnknownDataType
+
+		return data
+
+	elif datatype == str:
+		return [ord(c) for c in data]
+
+	elif datatype == int:
+		return [data]
+
+	elif datatype == float:
+		return [floatToRawLongBits(data)]
+
+	else:
+		raise UnknownDataType
+
+	return
+
+def floatToRawLongBits(value):
+	return struct.unpack('I', struct.pack('f', value))[0]
+
+def doubleToRawLongBits(value):
+	return struct.unpack('I', struct.pack('d', value))[0]
+
+def longBitsToDouble(bits):
+	return struct.unpack('d', struct.pack('I', bits))[0]
+
+def shortBitsToFloat(bits):
+	return struct.unpack('f', struct.pack('i', bits))[0]

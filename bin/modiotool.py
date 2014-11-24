@@ -56,7 +56,7 @@ def readJSON(inp, out, tags):
 	else:
 		print("Writing JSON data to modio output...")
 
-		with modio.open(out, modio.mode_write) as m:
+		with modio.open(out, "w") as m:
 			for num, k in enumerate(data):
 				if tags:
 					if k in tags:
@@ -75,13 +75,13 @@ def readModio(inp, out, tags):
 	numtags = 0
 
 	if tags:
-		with modio.open(inp, modio.mode_read) as m:
+		with modio.open(inp, "r") as m:
 			version, filesize, numtags = m.metadata()
 			for t in tags:
 				data.append(m.get(t))
 
 	else:
-		with modio.open(inp, modio.mode_read) as m:
+		with modio.open(inp, "r") as m:
 			version, filesize, numtags = m.metadata()
 			data = m.get()
 
@@ -90,7 +90,7 @@ def readModio(inp, out, tags):
 		print("file_size:", filesize)
 		print("num_tags:", numtags)
 		for num, i in enumerate(data):
-			print("[%d/%d] tag:'%s',size:'%d',data:'%s'"%(num+1, len(data), i.get_name_str(), i.get_size(), i.get_data_format()))
+			print("[%d/%d] tag:'%s',size:'%d',data:\n%s\n"%(num+1, len(data), i.get_name_str(), i.get_size(), i.get_data_format()))
 
 	else:
 		print("Writing modio data to JSON output...")

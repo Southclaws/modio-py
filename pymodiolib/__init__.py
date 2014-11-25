@@ -11,7 +11,6 @@ class ModioFileTag:
 
 	def __init__(self, tag, data):
 		data = validate_data_block_types(data)
-		print("new type:", type(data))
 
 		if type(tag) is str:
 			self.tag = _tag_StringToInt(tag)
@@ -25,7 +24,7 @@ class ModioFileTag:
 		return self.tag
 
 	def get_data(self):
-		return self.data
+		return self.data if len(self.data) > 1 else self.data[0]
 
 	def get_size(self):
 		return len(self.data)
@@ -247,9 +246,11 @@ def _tag_IntToString(i):
 # Ensures all elements in 'data' are uints
 def validate_data_block_types(data):
 	datatype = type(data)
-	print("Data type for", data, "is:", datatype)
 
+	# If the data block being validated is a list
 	if datatype == list:
+
+		# Run through the list to ensure it's only filled with uints
 		for i, d in enumerate(data):
 			datatype = type(d)
 
@@ -274,9 +275,6 @@ def validate_data_block_types(data):
 
 	elif datatype == int:
 		return [data]
-
-	elif datatype == float:
-		return [floatToRawLongBits(data)]
 
 	else:
 		raise UnknownDataType

@@ -8,23 +8,19 @@ class ModioWriteTest(unittest.TestCase):
 
 		print("Declaring data\n")
 
-		itag = "ITAG"
-		idata = 42
+		tag1 = "SCAL"
+		data1 = 42
 
-		ftag = "FTAG"
-		fdata = 88.142
-
-		stag = "STAG"
-		sdata = "This is my string data"
+		tag2 = "LIST"
+		data2 = [97, 34, 85, 23, 99, 54, 33, 75]
 
 		print("Opening file\n")
 
 		with modio.open("datafile.dat", "w") as m:
 			print("Writing data\n")
 
-			m.put(itag, idata)
-			m.put(ftag, fdata)
-			m.put(stag, sdata)
+			m.put(tag1, data1)
+			m.put(tag2, data2)
 
 		print("Write operation complete\n")
 		print("Reading data to verify it\n")
@@ -32,14 +28,11 @@ class ModioWriteTest(unittest.TestCase):
 		with modio.open("datafile.dat", "r") as m:
 			print("Reading data\n")
 
-			ret_idata = m.get(itag)
-			self.assertEqual(ret_idata.get_data(), [idata])
+			ret_data1 = m.get(tag1)
+			self.assertEqual(ret_data1.get_data(), data1)
 
-			ret_fdata = m.get(ftag)
-			self.assertEqual(round(modio.shortBitsToFloat(ret_fdata.get_data()[0]), 3), fdata)
-
-			ret_sdata = m.get(stag)
-			self.assertEqual(ret_sdata.get_data(), [sdata])
+			ret_data2 = m.get(tag2)
+			self.assertEqual(ret_data2.get_data(), data2)
 
 
 if __name__ == '__main__':

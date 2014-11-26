@@ -10,6 +10,8 @@ version = 20
 class ModioFileTag:
 
 	def __init__(self, tag, data):
+		logging.debug("[__init__] : %s, %s, %s"%(self, tag, data))
+
 		data = validate_data_block_types(data)
 
 		if type(tag) is str:
@@ -21,26 +23,40 @@ class ModioFileTag:
 			self.data = data
 
 	def get_name(self):
+		logging.debug("[get_name] : %s"%(self))
+
 		return self.tag
 
 	def get_data(self):
+		logging.debug("[get_data] : %s"%(self))
+
 		return self.data if len(self.data) > 1 else self.data[0]
 
 	def get_size(self):
+		logging.debug("[get_size] : %s"%(self))
+
 		return len(self.data)
 
 	def get_total_size(self):
+		logging.debug("[get_total_size] : %s"%(self))
+
 		return len(self.data) + 2
 
 	def get_name_str(self):
+		logging.debug("[get_name_str] : %s"%(self))
+
 		return _tag_IntToString(self.tag)
 
 	def get_data_block(self):
+		logging.debug("[get_data_block] : %s"%(self))
+
 		result = [self.tag, len(self.data)]
 		result.extend(self.data)
 		return result
 
 	def get_data_format(self):
+		logging.debug("[get_data_format] : %s"%(self))
+
 		data = []
 		tmp = ""
 		for i in self.data:
@@ -72,13 +88,13 @@ class ModioSession:
 	# self.tagdict
 
 	def __init__(self, filename, filemode):
-		logging.debug("__init__: %s"%(self))
+		logging.debug("[__init__] : %s, %s, %s"%(self, filename, filemode))
 
 		self.filename = filename
 		self.filemode = filemode
 
 	def __enter__(self):
-		logging.debug("__enter__: %s"%(self))
+		logging.debug("[__enter__] : %s"%(self))
 
 		self.filedata = []
 
@@ -96,11 +112,11 @@ class ModioSession:
 		return
 
 	def __exit__(self, *err):
-		logging.debug("__exit__: %s, %s"%(self, err))
+		logging.debug("[__exit__] : %s, %s"%(self, err))
 		self.close()
 
 	def __read__(self):
-		logging.debug("__read__")
+		logging.debug("[__read__] : %s"%(self))
 
 		try:
 			filehandle = io.open(self.filename, "rb")
@@ -134,12 +150,12 @@ class ModioSession:
 		return self
 
 	def __write__(self):
-		logging.debug("__write__")
+		logging.debug("[__write__] : %s"%(self))
 
 		return self
 
 	def close(self):
-		logging.debug("close: %s"%(self))
+		logging.debug("[close] : %s"%(self))
 
 		# Upon closing the file, if it was in write mode then write the data.
 		if self.filemode == "w":
@@ -150,6 +166,8 @@ class ModioSession:
 		return
 
 	def get_bytes(self):
+		logging.debug("[get_bytes] : %s"%(self))
+
 		# 3 cells for the metadata, then tag count x 2 (tag name + tag physpos)
 		header_size = 3 + (len(self.tagdict) * 2)
 		body_size = 0
@@ -165,12 +183,12 @@ class ModioSession:
 		tag_size = 0
 
 		for tag in self.tagdict.values():
-			print("APPENDING TAG", tag.get_name(), tag.get_name_str(), tag.get_data())
+			logging.debug("[get_bytes] : APPENDING TAG", tag.get_name(), tag.get_name_str(), tag.get_data())
 			# body size = sum of tag total sizes (tag + n + n data cells)
 			tag_size = tag.get_total_size()
 			body_size += tag_size
 
-			print("TAG SIZE: ", tag_size)
+			logging.debug("[get_bytes] : TAG SIZE: ", tag_size)
 
 			# Append two cells to the header (the tag name and the physical pos)
 			header += [tag.get_name(), header_physpos_pointer]
@@ -183,12 +201,12 @@ class ModioSession:
 
 		header[1] = header_size + body_size
 
-		print("HEADER SIZE: %d BODY SIZE: %d TOTAL: %d"%(header_size, body_size, header_size+body_size))
+		logging.debug("[get_bytes] : HEADER SIZE: %d BODY SIZE: %d TOTAL: %d"%(header_size, body_size, header_size+body_size))
 
 		return header + body
 
 	def get(self, tag = ""):
-		logging.debug("get: %s, %s"%(self, tag))
+		logging.debug("[get] : %s, %s"%(self, tag))
 
 		if tag:
 			return self.tagdict[tag]
@@ -197,7 +215,7 @@ class ModioSession:
 			return list(self.tagdict.values())
 
 	def put(self, tag, data):
-		logging.debug("put: %s, %s"%(self, tag))
+		logging.debug("[put] : %s, %s"%(self, tag))
 
 		self.tagdict[tag] = ModioFileTag(tag, data)
 

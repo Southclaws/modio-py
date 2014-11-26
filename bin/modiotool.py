@@ -23,9 +23,17 @@ def main():
 		metavar='FILE', type=str, nargs='?',
 		help='The output json or modio format file.')
 
+	parser.add_argument('--debug', '-d',
+		action='store_true',
+		help='Turn debugging prints on.')
+
 	args = parser.parse_args()
 
 	if args.input:
+		if args.debug:
+			logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+			logging.debug("Logging mode set to DEBUG")
+
 		if os.path.splitext(args.input)[1] == ".json":
 			print("input file is json, convert to modio")
 			readJSON(args.input, args.output, args.tags)

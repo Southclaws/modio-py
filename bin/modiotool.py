@@ -1,14 +1,11 @@
 import pymodiolib as modio
 import io
 import json
-import logging
 import argparse
 import os
 
 
 def main():
-	logging.basicConfig(filename='modio_debug.log', level=logging.DEBUG)
-
 	parser = argparse.ArgumentParser(description='Read and write modio format files.')
 
 	parser.add_argument('--input', '-i',
@@ -31,8 +28,8 @@ def main():
 
 	if args.input:
 		if args.debug:
-			logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-			logging.debug("Logging mode set to DEBUG")
+			modio.toggle_debug(True)
+			print("Debug mode activated.")
 
 		if os.path.splitext(args.input)[1] == ".json":
 			print("input file is json, convert to modio")
@@ -89,9 +86,15 @@ def readModio(inp, out, tags):
 				data.append(m.get(t))
 
 	else:
-		with modio.open(inp, "r") as m:
-			version, filesize, numtags = m.metadata()
-			data = m.get()
+		try:
+			with modio.open(inp, "r") as m:
+				version, filesize, numtags = m.metadata()
+				data = m.get()
+
+		except FileNotFoundError:
+			print("ERROR: File not found!")
+			return
+
 
 	if not out:
 		print("version:", version)

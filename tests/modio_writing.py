@@ -1,4 +1,7 @@
 import pymodiolib as modio
+import io
+import struct
+import random
 import unittest
 
 
@@ -33,6 +36,21 @@ class ModioWriteTest(unittest.TestCase):
 
 			ret_data2 = m.get(tag2)
 			self.assertEqual(ret_data2.get_data(), data2)
+
+	def test_bad_file(self):
+
+		print("Creating a bad file")
+
+		with io.open("badfile.dat", "wb") as f:
+			data = [random.randint(32, 127) for _ in range(16)]
+			f.write(struct.pack('16I', *data))
+
+		print("Trying to read data")
+
+		with modio.open("badfile.dat", "r") as m:
+			data = m.get("ATAG")
+
+		print("Done.")
 
 
 if __name__ == '__main__':

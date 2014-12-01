@@ -4,7 +4,9 @@ import string
 import logging
 
 
-version = 20
+# "constant"
+def MODIO_VERSION():
+	return 20
 
 
 class ModioFileTag:
@@ -130,9 +132,22 @@ class ModioSession:
 
 		filehandle.close()
 
+		if len(self.filedata) < 3:
+			raise InvalidModioFormat
+
 		self.filever = self.filedata[0]
+
+		if self.filever != MODIO_VERSION():
+			raise IncorrectModioVersion
+
 		self.filelen = self.filedata[1]
+
+		# No file size limit
+
 		self.numtags = self.filedata[2]
+
+		if self.numtags > 4096:
+			raise ModioTagOverflow
 
 		head_pointer = 3
 
@@ -173,7 +188,7 @@ class ModioSession:
 		body_size = 0
 
 		# version, file length and tag count (file length is added afterwards)
-		header = [version, 0, len(self.tagdict)]
+		header = [MODIO_VERSION(), 0, len(self.tagdict)]
 		body = []
 
 		# Points at the physical position of the current tag data block

@@ -1,4 +1,4 @@
-import pymodiolib as modio
+import modio
 import io
 import json
 import argparse

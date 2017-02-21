@@ -75,4 +75,4 @@ def longBitsToDouble(bits):
 
 
 def shortBitsToFloat(bits):
-    return struct.unpack('f', struct.pack('i', bits))[0]
+    return struct.unpack('f', struct.pack('I', bits))[0]

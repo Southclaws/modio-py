@@ -7,7 +7,7 @@ from .utils import (_tag_IntToString, _tag_StringToInt,
 class ModioFileTag:
 
     def __init__(self, tag, data):
-        logging.info("[__init__] : %s, %s, %s" % (self, tag, data))
+        logging.info("%s, %s, %s" % (self, tag, data))
 
         data = validate_data_block_types(data)
 
@@ -19,40 +19,39 @@ class ModioFileTag:
             self.tag = tag
             self.data = data
 
-    def get_name(self):
-        logging.info("[get_name] : %s" % (self))
+    def get_name(self, decode=True):
+        logging.info("%s" % (self))
 
-        return self.tag
+        if decode:
+            return _tag_IntToString(self.tag)
+
+        else:
+            return self.tag
 
     def get_data(self):
-        logging.info("[get_data] : %s" % (self))
+        logging.info("%s" % (self))
 
         return self.data if len(self.data) > 1 else self.data[0]
 
     def get_size(self):
-        logging.info("[get_size] : %s" % (self))
+        logging.info("%s" % (self))
 
         return len(self.data)
 
     def get_total_size(self):
-        logging.info("[get_total_size] : %s" % (self))
+        logging.info("%s" % (self))
 
         return len(self.data) + 2
 
-    def get_name_str(self):
-        logging.info("[get_name_str] : %s" % (self))
-
-        return _tag_IntToString(self.tag)
-
     def get_data_block(self):
-        logging.info("[get_data_block] : %s" % (self))
+        logging.info("%s" % (self))
 
         result = [self.tag, len(self.data)]
         result.extend(self.data)
         return result
 
     def get_data_format(self):
-        logging.info("[get_data_format] : %s" % (self))
+        logging.info("%s" % (self))
 
         data = []
         for i in self.data:
